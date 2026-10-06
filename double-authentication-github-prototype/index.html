@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Double Authentication System</title>
+  <meta name="description" content="Prototype of a double authentication system using face recognition and eye blink count recognition.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <div class="ambient ambient-a"></div>
+  <div class="ambient ambient-b"></div>
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">2FA</div>
+      <div>
+        <strong>Double Auth</strong>
+        <span>Biometric Security Prototype</span>
+      </div>
+    </div>
+    <div class="status-pill" id="modelStatus">
+      <span class="dot"></span> Loading AI models…
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="hero">
+      <div>
+        <span class="eyebrow">BG2 • PROJECT PROTOTYPE</span>
+        <h1>Two layers.<br><span>One secure identity.</span></h1>
+        <p>Verify the face first, then enter a numeric credential using eye-blink counts. The prototype runs directly in the browser.</p>
+      </div>
+      <div class="hero-card">
+        <div class="mini-icon">◉</div>
+        <div>
+          <b>Face → Blink → Access</b>
+          <small>No password typing required for the second factor.</small>
+        </div>
+      </div>
+    </section>
+
+    <section class="app-grid">
+      <div class="camera-card card">
+        <div class="card-head">
+          <div>
+            <span class="step-label" id="stepLabel">STEP 1</span>
+            <h2 id="stageTitle">Face verification</h2>
+          </div>
+          <span class="live-badge" id="liveBadge">OFFLINE</span>
+        </div>
+
+        <div class="camera-wrap">
+          <video id="video" autoplay muted playsinline></video>
+          <canvas id="overlay"></canvas>
+          <div class="camera-placeholder" id="cameraPlaceholder">
+            <div class="camera-icon">⌁</div>
+            <b>Camera access required</b>
+            <span>Allow camera permission to begin.</span>
+          </div>
+          <div class="scan-line"></div>
+          <div class="face-frame"></div>
+          <div class="camera-status" id="cameraStatus">Camera not started</div>
+        </div>
+
+        <div class="metric-row">
+          <div class="metric">
+            <span>Face match</span>
+            <b id="faceScore">—</b>
+          </div>
+          <div class="metric">
+            <span>Blink count</span>
+            <b id="blinkCount">0</b>
+          </div>
+          <div class="metric">
+            <span>Session</span>
+            <b id="sessionStatus">Locked</b>
+          </div>
+        </div>
+
+        <div class="controls">
+          <button class="primary" id="startBtn">Start camera</button>
+          <button class="secondary" id="enrollBtn">Enroll face</button>
+          <button class="ghost" id="resetBtn">Reset</button>
+        </div>
+      </div>
+
+      <aside class="side-column">
+        <div class="card auth-card">
+          <div class="card-head compact">
+            <div>
+              <span class="step-label">AUTHENTICATION</span>
+              <h2>Access control</h2>
+            </div>
+            <div class="lock" id="lockIcon">🔒</div>
+          </div>
+
+          <div class="auth-steps">
+            <div class="auth-step active" id="faceStep">
+              <div class="step-number">1</div>
+              <div><b>Face recognition</b><small>Match your enrolled identity.</small></div>
+              <span id="faceState">Waiting</span>
+            </div>
+            <div class="connector"></div>
+            <div class="auth-step" id="blinkStep">
+              <div class="step-number">2</div>
+              <div><b>Eye-blink PIN</b><small>Blink groups form the PIN.</small></div>
+              <span id="blinkState">Locked</span>
+            </div>
+          </div>
+
+          <div class="pin-box">
+            <span>BLINK PIN</span>
+            <div class="pin-dots" id="pinDots"><i></i><i></i><i></i></div>
+            <p id="pinHelp">Example: PIN <b>1-2-3</b> means blink once, pause, blink twice, pause, blink three times.</p>
+          </div>
+
+          <button class="primary full" id="demoBtn">Use demo identity</button>
+          <button class="danger full" id="logoutBtn">Lock session</button>
+        </div>
+
+        <div class="card info-card">
+          <div class="info-title">System architecture</div>
+          <div class="flow">
+            <span>Camera</span><b>→</b><span>Face</span><b>→</b><span>Blink PIN</span><b>→</b><strong>Access</strong>
+          </div>
+          <p>This browser prototype mirrors the project flow described in the report: face verification precedes eye-blink count authentication.</p>
+        </div>
+      </aside>
+    </section>
+
+    <section class="features">
+      <div class="feature"><b>01</b><span>Face verification</span><small>Client-side face descriptor matching</small></div>
+      <div class="feature"><b>02</b><span>Eye blink detection</span><small>Facial landmark / EAR analysis</small></div>
+      <div class="feature"><b>03</b><span>Layered access</span><small>Second factor unlocks protected content</small></div>
+      <div class="feature"><b>04</b><span>GitHub Pages ready</span><small>No Python server required for this demo</small></div>
+    </section>
+
+    <section class="protected card" id="protectedPanel">
+      <div>
+        <span class="eyebrow">PROTECTED AREA</span>
+        <h2>Authentication successful</h2>
+        <p>You have passed both prototype layers. In a production system, this area would be replaced by the protected application/data.</p>
+      </div>
+      <div class="access-badge">ACCESS GRANTED</div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <dialog id="enrollDialog">
+    <div class="dialog-content">
+      <button class="close" id="closeDialog">×</button>
+      <span class="eyebrow">ENROLLMENT</span>
+      <h2>Create your prototype identity</h2>
+      <p>Enter a display name and blink PIN. Your face descriptor is stored only in this browser's local storage.</p>
+      <label>Name<input id="nameInput" placeholder="e.g. Sri Vibhav" maxlength="30"></label>
+      <label>Blink PIN<input id="pinInput" inputmode="numeric" pattern="[1-5]{3}" maxlength="3" placeholder="123"></label>
+      <small class="hint">Each digit must be 1–5 blinks.</small>
+      <button class="primary full" id="saveEnroll">Capture & enroll</button>
+    </div>
+  </dialog>
+</body>
+</html>
